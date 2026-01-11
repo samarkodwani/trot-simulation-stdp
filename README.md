@@ -31,9 +31,12 @@ To run the simulation, you need Python 3 and the following libraries:
 git clone https://github.com/samarkodwani/trot-simulation-stdp.git
 ```
 2. **Run the Learning Simulation**: This script initializes a random brain, trains it with a teacher signal, and tests the learned behavior.
-python main_learning.py
+```bash
+python baseline_static.py
+```
 
 3. **Run the Static Baseline (Control)**: This script runs a hardcoded CPG to demonstrate the target behavior without learning.
-
+```bash
 python baseline_static.py
+```
 
