@@ -1,4 +1,4 @@
-#### Cleaned Learning Trot
+#### Learning Trot
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -119,4 +119,5 @@ for i in range(4):  # Offset traces to make different legs visible
 plt.yticks([])
 plt.legend(loc='upper right')
 plt.tight_layout()
+
 plt.show()
