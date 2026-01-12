@@ -27,7 +27,7 @@ class Quadruped:
         self.xtrace = np.zeros(N)
         self.ytrace = np.zeros(N) 
 
-        self.g = np.zeros(N) # A single neuron has a "bucket" of conductance
+        self.g = np.zeros(N) 
         self.tau = 10.0
         self.lr = 0.01
 
@@ -39,12 +39,11 @@ class Quadruped:
         E = -80  # Inhibitory reversal potential
         I_syn = -self.g * (self.v - E) # Synaptic current
         
-        # Differential equations for the spike curve (Izhikevich Model)
         self.v += (0.04 * self.v**2 + 5 * self.v - self.u + 140 + I + I_syn) * dt 
         self.u += self.a * (self.b * self.v - self.u) * dt
 
-        fired = self.v >= 30  # This is a boolean mask
-        fired_indices = np.where(fired)[0] # Indices of the neurons that fired 
+        fired = self.v >= 30  
+        fired_indices = np.where(fired)[0] 
 
         for i in fired_indices:
             self.W[:, i] += self.lr * self.xtrace  # Increase the weight (Anti-Hebbian Learning)
