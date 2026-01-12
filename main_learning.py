@@ -24,8 +24,7 @@ class Quadruped:
                 if i != j:
                     self.W[i, j] = np.random.rand()
 
-        self.xtrace = np.zeros(N)
-        self.ytrace = np.zeros(N) 
+        self.xtrace = np.zeros(N) 
 
         self.g = np.zeros(N) 
         self.tau = 10.0
@@ -120,3 +119,4 @@ plt.legend(loc='upper right')
 plt.tight_layout()
 
 plt.show()
+
