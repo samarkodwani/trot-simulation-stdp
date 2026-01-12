@@ -69,9 +69,9 @@ class Quadruped:
 
         fired = self.v >= 30
         # The above one is a mask; we need indices
-        fired_meow = np.where(fired)[0]
+        fired_indices = np.where(fired)[0]
         
-        for i in fired_meow:
+        for i in fired_indices:
             self.g += self.W[:, i] # Check i-th column, it has all its connections
         
         self.v[fired] = self.c
@@ -116,4 +116,5 @@ plt.xlabel("Time (steps)")
 plt.yticks([]) # Hide the fake y-axis numbers
 plt.legend(loc='upper right') # Show the labels
 plt.tight_layout()
+
 plt.show()
