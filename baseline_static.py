@@ -1,7 +1,7 @@
 """
 PROJECT: Static Quadruped CPG (Baseline)
 
-ENGINEERING NOTES & STABILITY ANALYSIS:
+NOTES & STABILITY ANALYSIS:
 During development, the code exploded (values went to infinity) with:
 1) No random noise
 2) dt = 0.5
@@ -113,8 +113,8 @@ for i in range(len(colors)):
     
 plt.title("Quadruped Gait Pattern (Pace)") 
 plt.xlabel("Time (steps)")
-plt.yticks([]) # Hide the fake y-axis numbers
-plt.legend(loc='upper right') # Show the labels
+plt.yticks([])
+plt.legend(loc='upper right') 
 plt.tight_layout()
 
 plt.show()
