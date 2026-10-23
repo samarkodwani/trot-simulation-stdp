@@ -11,10 +11,16 @@ Understanding the cause:
 - Without noise, it still worked but became completely sync-ed.
 - The main culprit: dt = 0.5, as the voltage went to 1e159 (infinity)!
   For a stiff model like Izhikevich, a smaller timestep is required to catch the spike.
+- Likely mechanism (HYPOTHESIS, not yet tested): the synaptic term -g*(v - E)
+  makes the Euler update contain a factor of about (1 - g*dt). If |1 - g*dt| > 1
+  (large g and large dt), v oscillates with growing amplitude. The v^2 term is
+  mostly caught by the spike reset at v >= 30, so it may not be the main cause.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+GAIT = "trot"   # "trot" or "pace"
 
 class Quadruped:
     def __init__(self, N=4):
@@ -29,29 +35,21 @@ class Quadruped:
         self.v = self.c + np.random.rand(N) * 10 # Added random noise
         self.u = self.v * self.b
         self.w = 5
+        self.v_peak = self.v.copy() # Voltage recorded BEFORE the reset, so spike peaks are visible
         
         # --- GAIT PATTERN SETUP ---
-        
-        # A wrong approach. We actually have a pattern:
-        '''
-        self.W = np.zeros((N, N))
-        self.W[0, 1] = self.w
-        self.W[0, 2] = self.w
-        ...
-        '''
+        # Neuron order: 0 = FL, 1 = FR, 2 = HL, 3 = HR
+        # Connected pairs inhibit each other; uncoupled pairs are free to fire together.
 
-        # For Trot:
-        '''
-        self.W = np.zeros((N,N))
-        pairs = [(0,1), (2,3), (0,2), (1,3)]  # This is the pattern for trot
-        for i,j in pairs:
-          self.W[i,j] = self.w
-          self.W[j,i] = self.w
-        '''
+        # For Trot (FL/HR together, FR/HL together -> the diagonals are uncoupled):
+        trot_pairs = [(0,1), (2,3), (0,2), (1,3)]
 
-        # For Pace:
+        # For Pace (FL/HL together, FR/HR together -> the same-side legs are uncoupled):
+        pace_pairs = [(0,1), (0,3), (2,1), (2,3)]
+
+        pairs = trot_pairs if GAIT == "trot" else pace_pairs
+
         self.W = np.zeros((N,N))
-        pairs = [(0,1), (0,3), (2,1), (2,3)]
         for i, j in pairs:
             self.W[i, j] = self.w
             self.W[j, i] = self.w
@@ -70,6 +68,9 @@ class Quadruped:
         fired = self.v >= 30
         # The above one is a mask; we need indices
         fired_indices = np.where(fired)[0]
+
+        # Record the voltage before the reset; clip fired neurons to 30 so the spike peak shows
+        self.v_peak = np.where(fired, 30.0, self.v)
         
         for i in fired_indices:
             self.g += self.W[:, i] # Check i-th column, it has all its connections
@@ -81,7 +82,7 @@ class Quadruped:
 
 # --- Simulation ---
 T = 1000
-dt = 0.1  # Better for a stiff model like this than 0.5 ms (why?)
+dt = 0.1  # Better for a stiff model like this than 0.5 ms
 steps = int(T / dt)
 q = Quadruped()
 trace = []
@@ -89,9 +90,10 @@ I = 5
 
 for i in range(steps):
     q.step(dt, I)
-    trace.append(q.v.copy())
+    trace.append(q.v_peak.copy()) 
 
 trace = np.array(trace)
+time = np.arange(steps) * dt # Time in ms
 
 # --- Visualization ---
 plt.figure(figsize=(10, 5))
@@ -109,10 +111,10 @@ names = ['FL', 'FR', 'HL', 'HR']
 
 for i in range(len(colors)):
     current = trace[:, i]
-    plt.plot(current + i*120, color=colors[i], label=names[i]) # Keeping them at different heights
+    plt.plot(time, current + i*120, color=colors[i], label=names[i]) # Keeping them at different heights
     
-plt.title("Quadruped Gait Pattern (Pace)") 
-plt.xlabel("Time (steps)")
+plt.title(f"Quadruped Gait Pattern ({GAIT.capitalize()})") 
+plt.xlabel("Time (ms)")
 plt.yticks([])
 plt.legend(loc='upper right') 
 plt.tight_layout()
