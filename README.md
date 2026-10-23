@@ -15,7 +15,9 @@ With dt = 0.5 ms the voltage diverged (values reached ~1e159); dt = 0.1 ms fixed
 
 ### Visuals
 **1. Learned synaptic weights**
+
 ![Weight Matrix](images/heatmap_weights.png)
+
 *Strong inhibition forms between competing limbs (e.g. FL vs FR); diagonal partners stay uncoupled by construction.*
 
 **2. Test run (no teacher signal)**
