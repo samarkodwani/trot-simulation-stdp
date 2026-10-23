@@ -32,7 +32,7 @@ git clone https://github.com/samarkodwani/trot-simulation-stdp.git
 ```
 2. **Run the Learning Simulation**: This script initializes a random brain, trains it with a teacher signal, and tests the learned behavior.
 ```bash
-python baseline_static.py
+python main_learning.py
 ```
 
 3. **Run the Static Baseline (Control)**: This script runs a hardcoded CPG to demonstrate the target behavior without learning.
