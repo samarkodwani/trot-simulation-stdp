@@ -1,42 +1,36 @@
-# Spiking Neural Network CPG with STDP Learning
+# Spiking Neural Network CPG with Trot-Gait Plasticity
 
 ### Project Description
-A simulation of a Quadruped Central Pattern Generator (CPG) that **learns** a Trot gait using **Anti-Hebbian Spike-Timing Dependent Plasticity (STDP)**.
+A simulation of a quadruped Central Pattern Generator (CPG) built from **Izhikevich neurons (2003)**. A teacher signal trains the network, using a **simplified trace-based, anti-Hebbian plasticity rule**, to settle into a **trot** gait (diagonal limb pairs FL/HR and FR/HL fire together).
 
-The network dynamics are modeled using **Izhikevich neurons (2003)** to capture realistic spiking behavior. The system solves the differential equations using **Euler's Method** with a time step of **dt = 0.1 ms** to ensure numerical stability during rapid voltage spikes.
+This is a learning exercise, not a full STDP model. The rule only potentiates, with no depression term and no timing window. Equations are integrated with Euler's method at **dt = 0.1 ms**.
 
-It demonstrates **Emergent Behavior**. The network is initialized with random weights and self-organizes into a stable "Trot" rhythm solely through interaction with a teacher signal and plasticity rules.
+### What is learned and what is built in
+- **Learned:** the strengths of the inhibitory connections between competing limbs, starting from random weights.
+- **Built in:** the teacher signal drives the diagonal pairs in alternation, and the weights between diagonal partners are fixed at zero by design (`partner = 3 - i`).
+- So the network does not discover the trot from scratch. It learns to sustain a rhythm whose structure is largely imposed.
 
-### Key Technical Insight: The "Euler Explosion"
-A major challenge arose during the implementation due to the selection of the time step (`dt`). Initially using **0.5 ms** resulted in an explosion where the voltage spiked to infinity (values reached `1e159`). This occurred because the quadratic term ($v^2$) in the Izhikevich differential equation causes the voltage slope to steepen rapidly during a spike; a larger time step fails to capture this curve, leading to numerical instability. Reducing `dt` to **0.1 ms** resolved this.
+### Numerical stability note
+With dt = 0.5 ms the voltage diverged (values reached ~1e159); dt = 0.1 ms fixed it. My hypothesis is that the synaptic term `-g(v - E)` makes the Euler update unstable for large `g·dt`, and that the `v²` term is largely caught by the spike reset. **I have not yet tested this.**
 
 ### Visuals
-**1. Learned Synaptic Weights**
+**1. Learned synaptic weights**
 ![Weight Matrix](images/heatmap_weights.png)
-*The heatmap above shows the learned inhibitory connections. Strong inhibition (Dark Red) formed between competing limbs (e.g., FL vs FR), while diagonal pairs remained uncoupled, creating the Trot architecture.*
+*Strong inhibition forms between competing limbs (e.g. FL vs FR); diagonal partners stay uncoupled by construction.*
 
-**2. Learned Trot Gait (Test Run)**
+**2. Test run (no teacher signal)**
 ![Trot Trace](images/trot_trace.png)
-*Voltage traces during the test phase (No external teacher). The network autonomously generates an alternating rhythm where diagonal pairs (FL/HR and FR/HL) fire in sync.*
+*The network generates an alternating rhythm with diagonal pairs firing together.*
 
-### Dependencies
-To run the simulation, you need Python 3 and the following libraries:
-* `numpy`
-* `matplotlib`
-* `seaborn`
+### Limitations / next steps
+- Add a depression term and a proper STDP timing window.
+- Remove the hard-coded partner constraint and see if the trot still emerges.
+- Test robustness across random seeds.
+- Test the Euler instability hypothesis directly (vary `g` and `dt`).
 
 ### How to Run
-1. **Clone the repository:**
- ```bash
-git clone https://github.com/samarkodwani/trot-simulation-stdp.git
-```
-2. **Run the Learning Simulation**: This script initializes a random brain, trains it with a teacher signal, and tests the learned behavior.
 ```bash
-python main_learning.py
+pip install numpy matplotlib seaborn
+python main_learning.py     # random init -> teacher training -> test
+python baseline_static.py   # hard-coded CPG (control)
 ```
-
-3. **Run the Static Baseline (Control)**: This script runs a hardcoded CPG to demonstrate the target behavior without learning.
-```bash
-python baseline_static.py
-```
-
